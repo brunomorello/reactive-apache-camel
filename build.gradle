@@ -1,0 +1,132 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.1.4'
+	id 'io.spring.dependency-management' version '1.1.3'
+	id "net.linguica.maven-settings" version "0.5"
+	id 'jacoco'
+}
+
+group = 'com.sabiam'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+jacoco {
+	toolVersion = "0.8.8"
+	reportsDirectory = layout.buildDirectory.dir('testReportDir')
+}
+
+jacocoTestReport {
+	reports {
+		html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+	}
+}
+
+test {
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	dependsOn test // tests are required to run before generating the report
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"com/sabiam/marketplace/exceptions/**",
+					"com/sabiam/marketplace/domain/**",
+					"com/sabiam/marketplace/config/**",
+					"com/sabiam/marketplace/client/**",
+					"com/sabiam/marketplace/factory/**",
+					"com/sabiam/marketplace/jobs/**",
+					"com/sabiam/marketplace/domain/**",
+					"com/sabiam/marketplace/constants/**",
+					"com/sabiam/marketplace/MarketplaceServiceApplication.class"
+			])
+		}))
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+//				minimum = 0.7
+				minimum = 0.0
+			}
+		}
+		rule {
+			limit {
+				counter = 'INSTRUCTIONS'
+				value = 'MISSEDRATIO'
+//				minimum = 0.3
+				minimum = 0.0
+			}
+		}
+	}
+}
+
+ext {
+	set('springCloudVersion', "2022.0.4")
+}
+
+repositories {
+	mavenCentral()
+	maven {
+		url 'https://pkgs.dev.azure.com/o2o-sabi/340ba9ed-da61-4e5e-b7d0-42678ed96168/_packaging/commons-model-lib/maven/v1'
+		name 'commons-model-lib'
+		authentication {
+			basic(BasicAuthentication)
+		}
+	}
+	maven {
+		url 'https://pkgs.dev.azure.com/o2o-sabi/340ba9ed-da61-4e5e-b7d0-42678ed96168/_packaging/commons-helper/maven/v1'
+		name 'commons-helper'
+		authentication {
+			basic(BasicAuthentication)
+		}
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+	implementation group: 'io.r2dbc', name: 'r2dbc-postgresql', version: '0.8.13.RELEASE'
+	implementation 'org.postgresql:postgresql:42.5.1'
+	runtimeOnly 'org.springframework:spring-jdbc'
+	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'org.apache.camel.springboot:camel-spring-boot-starter:4.0.1'
+	implementation 'org.apache.camel.springboot:camel-jackson-starter:4.0.1'
+	implementation 'org.apache.camel.springboot:camel-reactive-streams-starter:4.0.1'
+	// Remove rest dependencies
+	implementation 'org.apache.camel.springboot:camel-rest-starter:4.0.1'
+	implementation 'org.apache.camel.springboot:camel-jetty-starter:4.0.1'
+
+	implementation 'org.apache.kafka:kafka-streams'
+//	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'io.projectreactor:reactor-core'
+	implementation 'ch.qos.logback:logback-classic'
+	implementation 'io.projectreactor:reactor-tools'
+	implementation group: 'com.sabiam', name: 'commons-model-lib', version: '1.1.4-SNAPSHOT'
+	implementation group: 'com.sabiam', name: 'sabiam-commons-helper-lib', version: '1.2.6-SNAPSHOT'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.apache.camel:camel-test-spring-junit5:4.0.1'
+	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
