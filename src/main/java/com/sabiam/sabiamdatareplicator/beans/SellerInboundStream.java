@@ -26,25 +26,25 @@ public class SellerInboundStream {
     public Publisher<Seller> createSeller(Publisher<SellerInbound> sellerInboundPublisher) {
         return Mono.from(sellerInboundPublisher)
             .log()
-            .map(sellerInbound -> {
-                Seller seller = Seller.builder()
-                    .id(UUID.randomUUID())
-                    .publicId(UUID.randomUUID())
-                    .firstName(sellerInbound.firstName())
-                    .lastName(sellerInbound.lastName())
-                    .email(sellerInbound.email())
-                    .phoneNumber(sellerInbound.phoneNumber())
-                    .createdDate(LocalDateTime.parse(sellerInbound.createdAt()))
-                    .createdBy(sellerInbound.createdBy())
-                    .build();
-                return seller;
-            })
             .log()
-            .flatMap(seller -> repository.save(seller)
-                .onErrorResume(throwable -> {
-                    LOGGER.error("Error to Create Seller {}", throwable.getMessage());
-                    throw new IllegalArgumentException("Error to Create Seller");
-                }));
+            .flatMap(sellerInbound -> {
+                Seller seller = Seller.builder()
+                        .id(UUID.randomUUID())
+                        .publicId(UUID.randomUUID())
+                        .firstName(sellerInbound.firstName())
+                        .lastName(sellerInbound.lastName())
+                        .email(sellerInbound.email())
+                        .phoneNumber(sellerInbound.phoneNumber())
+                        .createdDate(LocalDateTime.parse(sellerInbound.createdAt()))
+                        .createdBy(sellerInbound.createdBy())
+                        .build();
+                return repository.save(seller)
+                        .contextWrite(TenantContext.withTenantId(sellerInbound.country()))
+                        .onErrorResume(throwable -> {
+                            LOGGER.error("Error to Create Seller {}", throwable.getMessage());
+                            throw new IllegalArgumentException("Error to Create Seller");
+                        });
+            });
     }
 
 }

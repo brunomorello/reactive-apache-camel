@@ -42,12 +42,6 @@ public class RestRoute extends RouteBuilder {
                 .post("seller").type(SellerInbound.class)
                 .routeId("inboundDataSeller")
                 .type(SellerInbound.class)
-                .to("direct:setTenant");
-//                .to("direct:processSeller");
-
-        from("direct:setTenant")
-                .routeId("setTenantInterceptor")
-                .bean("tenantBean", "setTenant")
                 .to("direct:processSeller");
 
         from("direct:processSeller")

@@ -7,17 +7,17 @@ import java.util.function.Function;
 
 public class TenantContext {
 
-    public static final String TENANT_ID = TenantContext.class.getName() + ".TENANT_ID";
+    public static final String TENANT_KEY = "TENANT_KEY";
 
     public static Context withTenantId(String id) {
-        return Context.of(TENANT_ID, Mono.just(id));
+        return Context.of(TENANT_KEY, Mono.just(id));
     }
 
-    public static Mono<String> getTenantId() {
-        return Mono.deferContextual(contextView -> contextView.hasKey(TENANT_ID) ? contextView.get(TENANT_ID) : Mono.empty());
+    public static Mono<Object> getTenantKey() {
+        return Mono.deferContextual(contextView -> contextView.hasKey(TENANT_KEY) ? contextView.get(TENANT_KEY) : Mono.empty());
     }
 
     public static Function<Context, Context> clearContext() {
-        return (context) -> context.delete(TENANT_ID);
+        return (context) -> context.delete(TENANT_KEY);
     }
 }
