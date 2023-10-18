@@ -1,25 +1,19 @@
 package com.sabiam.sabiamdatareplicator.beans;
 
-import com.sabiam.commons.response.AppResponse;
 import com.sabiam.sabiamdatareplicator.configuration.TenantContext;
 import com.sabiam.sabiamdatareplicator.model.SellerInbound;
 import com.sabiam.sabiamdatareplicator.model.Seller;
 import com.sabiam.sabiamdatareplicator.repository.SellerRepository;
-import jakarta.annotation.PostConstruct;
-import org.apache.camel.Configuration;
-import org.apache.camel.component.reactive.streams.api.CamelReactiveStreamsService;
-import org.eclipse.jetty.http.HttpStatus;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component("sellerBean")
 public class SellerInboundStream {
@@ -30,10 +24,9 @@ public class SellerInboundStream {
     private SellerRepository repository;
 
     public Publisher<Seller> createSeller(Publisher<SellerInbound> sellerInboundPublisher) {
-        return Flux.from(sellerInboundPublisher)
+        return Mono.from(sellerInboundPublisher)
             .log()
             .map(sellerInbound -> {
-                TenantContext.withTenantId(sellerInbound.country());
                 Seller seller = Seller.builder()
                     .id(UUID.randomUUID())
                     .publicId(UUID.randomUUID())
