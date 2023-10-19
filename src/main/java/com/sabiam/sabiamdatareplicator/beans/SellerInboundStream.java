@@ -26,7 +26,6 @@ public class SellerInboundStream {
     public Publisher<Seller> createSeller(Publisher<SellerInbound> sellerInboundPublisher) {
         return Mono.from(sellerInboundPublisher)
             .log()
-            .log()
             .flatMap(sellerInbound -> {
                 Seller seller = Seller.builder()
                         .id(UUID.randomUUID())
