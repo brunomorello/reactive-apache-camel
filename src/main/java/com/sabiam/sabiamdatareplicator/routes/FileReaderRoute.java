@@ -12,8 +12,11 @@ public class FileReaderRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
+
+
         from("file://D:/Users/bmo/tmp/")
             .routeId("inputFile")
+            .autoStartup(false)
             .log(LoggingLevel.INFO, "#### Starting File Route")
             .unmarshal().json(JsonLibrary.Jackson, SellerInbound.class)
             .process(new SellerProcessor());
