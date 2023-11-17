@@ -1,6 +1,8 @@
 package com.sabiam.sabiamdatareplicator.routes;
 
+import com.sabiam.sabiamdatareplicator.model.CustomerInbound;
 import com.sabiam.sabiamdatareplicator.model.SellerInbound;
+import com.sabiam.sabiamdatareplicator.processor.CustomerProcessor;
 import com.sabiam.sabiamdatareplicator.processor.SellerProcessor;
 import com.sabiam.sabiamdatareplicator.repository.SellerRepository;
 import org.apache.camel.LoggingLevel;
@@ -21,6 +23,12 @@ public class RestRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
+
+        onException(NullPointerException.class)
+                .routeId("errorDrools")
+                .handled(true)
+                .log(LoggingLevel.ERROR, "Error to find Drools xls with proper rules");
+
         restConfiguration()
                 .component("jetty")
                 .host("0.0.0.0")
@@ -35,10 +43,23 @@ public class RestRoute extends RouteBuilder {
                 .type(SellerInbound.class)
                 .to("direct:processSeller");
 
+        rest("inboundData")
+                .produces("application/json")
+                .post("customer")
+                .type(CustomerInbound.class)
+                .routeId("inboundCustomer")
+                .to("direct:processCustomer");
+
         from("direct:processSeller")
                 .routeId("processSeller")
                 .bean("sellerBean", "createSeller")
                 .process(new UnwrapStreamProcessor())
                 .log(LoggingLevel.INFO, "processing inbound seller");
+
+        from("direct:processCustomer")
+                .log(LoggingLevel.INFO, "Processing Customer: ${body}")
+                .routeId("processCustomer")
+                .process(new CustomerProcessor())
+                .log(LoggingLevel.INFO, "Customer Processed: ${body}");
     }
 }

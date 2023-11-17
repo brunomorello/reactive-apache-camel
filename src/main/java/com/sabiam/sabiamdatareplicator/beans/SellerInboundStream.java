@@ -23,6 +23,9 @@ public class SellerInboundStream {
     @Autowired
     private SellerRepository repository;
 
+    // Implement Multitenant with Liquibase
+    // https://www.linkedin.com/pulse/implementando-multitenancy-com-spring-boot-e-ruben-lins-silva/?originalSubdomain=pt
+
     public Publisher<Seller> createSeller(Publisher<SellerInbound> sellerInboundPublisher) {
         return Mono.from(sellerInboundPublisher)
             .log()

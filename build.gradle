@@ -102,6 +102,14 @@ dependencies {
 	runtimeOnly 'org.springframework:spring-jdbc'
 	annotationProcessor 'org.projectlombok:lombok'
 	implementation 'org.apache.camel.springboot:camel-spring-boot-starter:4.0.1'
+
+	// https://mvnrepository.com/artifact/org.drools/drools-engine
+	implementation 'org.drools:drools-engine:8.42.0.Final'
+	implementation 'org.drools:drools-xml-support:8.42.0.Final'
+	implementation 'org.drools:drools-core:8.42.0.Final'
+	implementation 'org.drools:drools-compiler:8.42.0.Final'
+	implementation "org.kie:kie-api:8.42.0.Final"
+
 	implementation 'org.apache.camel.springboot:camel-hazelcast-starter:4.0.1'
 	implementation 'org.apache.camel.springboot:camel-jackson-starter:4.0.1'
 	implementation 'org.apache.camel.springboot:camel-reactive-streams-starter:4.0.1'
